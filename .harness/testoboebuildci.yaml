@@ -39,7 +39,7 @@ pipeline:
                   spec:
                     uses: actions/setup-java@v3
                     with:
-                      distribution: "'temurin'"
+                      distribution: temurin
                       java-version: "17"
                   when:
                     stageStatus: All
