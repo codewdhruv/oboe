@@ -1,0 +1,76 @@
+pipeline:
+  name: test-oboe-buildci
+  identifier: testoboebuildci
+  projectIdentifier: NgLabs
+  orgIdentifier: default
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: gitconnectordhruba
+        repoName: oboe
+        build: <+input>
+  stages:
+    - stage:
+        name: Build CI
+        identifier: Build_CI
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: Action
+                  name: Checkout
+                  identifier: Checkout
+                  spec:
+                    uses: actions/checkout@v3
+              - step:
+                  type: Action
+                  name: set up JDK 17
+                  identifier: set_up_JDK_17
+                  spec:
+                    uses: actions/setup-java@v3
+                    with:
+                      distribution: "'temurin'"
+                      java-version: "17"
+              - step:
+                  type: Action
+                  name: build samples and apps
+                  identifier: build_samples_and_apps
+                  spec:
+                    uses: github/codeql-action/init@v2
+                    with:
+                      languages: cpp
+              - step:
+                  type: Run
+                  name: Build
+                  identifier: Build
+                  spec:
+                    shell: Sh
+                    command: |-
+                      pushd samples
+                      chmod +x gradlew
+                      ./gradlew -q clean bundleDebug
+                      popd
+                      pushd apps/OboeTester
+                      chmod +x gradlew
+                      ./gradlew -q clean bundleDebug
+                      popd
+                      pushd apps/fxlab
+                      chmod +x gradlew
+                      ./gradlew -q clean bundleDebug
+                      popd
+              - step:
+                  type: Action
+                  name: Perform CodeQL Analysis
+                  identifier: Perform_CodeQL_Analysis
+                  spec:
+                    uses: github/codeql-action/analyze@v2
