@@ -41,6 +41,9 @@ pipeline:
                     with:
                       distribution: "'temurin'"
                       java-version: "17"
+                  when:
+                    stageStatus: All
+                  failureStrategies: []
               - step:
                   type: Action
                   name: build samples and apps
@@ -49,6 +52,9 @@ pipeline:
                     uses: github/codeql-action/init@v2
                     with:
                       languages: cpp
+                  when:
+                    stageStatus: All
+                  failureStrategies: []
               - step:
                   type: Run
                   name: Build
@@ -68,9 +74,15 @@ pipeline:
                       chmod +x gradlew
                       ./gradlew -q clean bundleDebug
                       popd
+                  when:
+                    stageStatus: All
+                  failureStrategies: []
               - step:
                   type: Action
                   name: Perform CodeQL Analysis
                   identifier: Perform_CodeQL_Analysis
                   spec:
                     uses: github/codeql-action/analyze@v2
+                  when:
+                    stageStatus: All
+                  failureStrategies: []
